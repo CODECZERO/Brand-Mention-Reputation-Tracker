@@ -14,35 +14,31 @@ WORKDIR /workspace
 
 COPY . .
 
-RUN npm config delete include --global || true
+RUN npm config delete include --global || true \
+    && npm config set include dev --global
 
 RUN cd shared \
-    && unset npm_config_include NPM_CONFIG_INCLUDE \
-    && npm ci --include=prod \
+    && npm ci \
     && npm run build \
     && npm prune --omit=dev
 
 RUN cd aggregator \
-    && unset npm_config_include NPM_CONFIG_INCLUDE \
-    && npm ci --include=prod \
+    && npm ci \
     && npm run build \
     && npm prune --omit=dev
 
 RUN cd api-gateway \
-    && unset npm_config_include NPM_CONFIG_INCLUDE \
-    && npm ci --include=prod \
+    && npm ci \
     && npm run build \
     && npm prune --omit=dev
 
 RUN cd orchestrator \
-    && unset npm_config_include NPM_CONFIG_INCLUDE \
-    && npm ci --include=prod \
+    && npm ci \
     && npm run build \
     && npm prune --omit=dev
 
 RUN cd frontend \
-    && unset npm_config_include NPM_CONFIG_INCLUDE \
-    && npm ci --include=prod \
+    && npm ci \
     && npm run build
 
 # ------------------------------
