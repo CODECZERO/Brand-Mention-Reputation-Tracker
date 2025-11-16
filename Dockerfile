@@ -8,38 +8,39 @@ FROM node:20-bullseye AS node-builder
 
 ENV NPM_CONFIG_FUND=false \
     NPM_CONFIG_AUDIT=false \
-    npm_config_loglevel=warn \
-    npm_config_include="" \
-    NPM_CONFIG_INCLUDE=""
+    npm_config_loglevel=warn
 
 WORKDIR /workspace
 
 COPY . .
 
-RUN npm config delete include --global || true
+RUN npm config delete include --location=global || true \
+    && npm config delete include --location=user || true \
+    && npm config delete include --location=project || true
 
 RUN cd shared \
-    && npm_config_include=prod NPM_CONFIG_INCLUDE=prod npm ci \
-    && npm run build \
-    && npm prune --omit=dev
+    && unset npm_config_include NPM_CONFIG_INCLUDE \
+    && npm ci --omit=dev \
+    && npm run build
 
 RUN cd aggregator \
-    && npm_config_include=prod NPM_CONFIG_INCLUDE=prod npm ci \
-    && npm run build \
-    && npm prune --omit=dev
+    && unset npm_config_include NPM_CONFIG_INCLUDE \
+    && npm ci --omit=dev \
+    && npm run build
 
 RUN cd api-gateway \
-    && npm_config_include=prod NPM_CONFIG_INCLUDE=prod npm ci \
-    && npm run build \
-    && npm prune --omit=dev
+    && unset npm_config_include NPM_CONFIG_INCLUDE \
+    && npm ci --omit=dev \
+    && npm run build
 
 RUN cd orchestrator \
-    && npm_config_include=prod NPM_CONFIG_INCLUDE=prod npm ci \
-    && npm run build \
-    && npm prune --omit=dev
+    && unset npm_config_include NPM_CONFIG_INCLUDE \
+    && npm ci --omit=dev \
+    && npm run build
 
 RUN cd frontend \
-    && npm_config_include=prod NPM_CONFIG_INCLUDE=prod npm ci \
+    && unset npm_config_include NPM_CONFIG_INCLUDE \
+    && npm ci --omit=dev \
     && npm run build
 
 # ------------------------------
