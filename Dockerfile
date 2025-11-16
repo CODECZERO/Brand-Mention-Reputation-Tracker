@@ -8,7 +8,8 @@ FROM node:20-bullseye AS node-builder
 
 ENV NPM_CONFIG_FUND=false \
     NPM_CONFIG_AUDIT=false \
-    npm_config_loglevel=warn
+    npm_config_loglevel=warn \
+    npm_config_include=dev
 
 WORKDIR /workspace
 
