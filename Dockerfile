@@ -20,27 +20,27 @@ RUN npm config delete include --location=global || true \
 
 RUN cd shared \
     && unset npm_config_include NPM_CONFIG_INCLUDE \
-    && npm ci --omit=dev \
+    && npm i  \
     && npm run build
 
 RUN cd aggregator \
     && unset npm_config_include NPM_CONFIG_INCLUDE \
-    && npm ci --omit=dev \
+    && npm i \
     && npm run build
 
 RUN cd api-gateway \
     && unset npm_config_include NPM_CONFIG_INCLUDE \
-    && npm ci --omit=dev \
+    && npm i \
     && npm run build
 
 RUN cd orchestrator \
     && unset npm_config_include NPM_CONFIG_INCLUDE \
-    && npm ci --omit=dev \
+    && npm i  \
     && npm run build
 
 RUN cd frontend \
     && unset npm_config_include NPM_CONFIG_INCLUDE \
-    && npm ci --omit=dev \
+    && npm i \
     && npm run build
 
 # ------------------------------
