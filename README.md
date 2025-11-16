@@ -1,4 +1,5 @@
-# RapidQuest Platform
+# Brand-Mention-Reputation-Tracker
+
 
 A full-stack brand intelligence platform that ingests live mentions across the web, enriches them with AI, and surfaces insights through a React dashboard. The system is composed of multiple services (API Gateway, Aggregator, Orchestrator, Worker, Shared utilities) tied together via Redis queues and MongoDB, with a Vite + Tailwind frontend. A production deployment can be packaged into a single Docker container that serves the frontend and proxies backend APIs through Nginx.
 

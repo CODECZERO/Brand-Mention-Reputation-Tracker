@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+  aggregator:
+    build: .
+    image: rapidquest/aggregator:latest
+    container_name: aggregator
+    restart: unless-stopped
+    env_file:
+      - .env.example
+    ports:
+      - "4001:4001"
+    depends_on:
+      - redis
+      - mongo
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  mongo:
+    image: mongo:6
+    container_name: mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: rapidquest
+    ports:
+      - "27017:27017"

@@ -1,0 +1,23 @@
+{
+  "name": "@rapidquest/shared",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "redis": "^4.7.0",
+    "winston": "^3.17.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.8.6",
+    "rimraf": "^5.0.5",
+    "typescript": "^5.6.3"
+  }
+}
