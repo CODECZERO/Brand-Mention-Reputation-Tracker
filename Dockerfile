@@ -66,7 +66,8 @@ FROM python:3.11-slim AS runtime
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PATH="/opt/venv/bin:${PATH}"
+    PATH="/opt/venv/bin:${PATH}" \
+    PYTHONPATH="/app/worker/src:${PYTHONPATH}"
 
 # Install system deps, Node.js 20, and Nginx
 RUN apt-get update \
@@ -78,6 +79,7 @@ RUN apt-get update \
         build-essential \
         git \
         nginx \
+        gettext-base \
         tini \
         libopenblas0 \
         libomp5 \
