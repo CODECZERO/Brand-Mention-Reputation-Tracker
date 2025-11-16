@@ -42,14 +42,14 @@ graph LR
         D[RSS Feeds]
     end
 
-    subgraph Backend Services
+    subgraph Backend_Services
         AGG[Aggregator]
         API[API Gateway]
         ORCH[Orchestrator]
         WORKER[Worker]
     end
 
-    subgraph Data Stores
+    subgraph Data_Stores
         REDIS[[Redis]]
         MONGO[[MongoDB]]
     end
