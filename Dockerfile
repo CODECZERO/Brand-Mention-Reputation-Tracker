@@ -19,27 +19,27 @@ COPY . .
 RUN npm config delete include || true
 
 RUN cd shared \
-    && npm ci \
+    && npm_config_include=prod npm ci \
     && npm run build \
     && npm prune --omit=dev
 
 RUN cd aggregator \
-    && npm ci \
+    && npm_config_include=prod npm ci \
     && npm run build \
     && npm prune --omit=dev
 
 RUN cd api-gateway \
-    && npm ci \
+    && npm_config_include=prod npm ci \
     && npm run build \
     && npm prune --omit=dev
 
 RUN cd orchestrator \
-    && npm ci \
+    && npm_config_include=prod npm ci \
     && npm run build \
     && npm prune --omit=dev
 
 RUN cd frontend \
-    && npm ci \
+    && npm_config_include=prod npm ci \
     && npm run build
 
 # ------------------------------
