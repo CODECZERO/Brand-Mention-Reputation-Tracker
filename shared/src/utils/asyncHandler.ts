@@ -1,9 +1,18 @@
-import type { RequestHandler } from "express";
 import { wrapError } from "./errors.js";
 import { logger } from "../logger/index.js";
 
-export const asyncHandler = (handler: RequestHandler): RequestHandler => {
-  return ((req, res, next) => {
+type NextFunction = (error?: unknown) => void;
+
+export type RequestHandlerLike<Req = unknown, Res = unknown> = (
+  req: Req,
+  res: Res,
+  next: NextFunction,
+) => unknown;
+
+export const asyncHandler = <Req = unknown, Res = unknown>(
+  handler: RequestHandlerLike<Req, Res>,
+): RequestHandlerLike<Req, Res> => {
+  return ( (req: Req, res: Res, next: NextFunction) => {
     Promise.resolve(handler(req, res, next)).catch((error) => {
       const wrapped = wrapError(error);
       logger.error("Unhandled async handler error", {
@@ -14,5 +23,5 @@ export const asyncHandler = (handler: RequestHandler): RequestHandler => {
       });
       next(wrapped);
     });
-  }) as RequestHandler;
+  }) as RequestHandlerLike<Req, Res>;
 };
