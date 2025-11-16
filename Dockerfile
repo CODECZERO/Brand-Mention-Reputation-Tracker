@@ -9,11 +9,14 @@ FROM node:20-bullseye AS node-builder
 ENV NPM_CONFIG_FUND=false \
     NPM_CONFIG_AUDIT=false \
     npm_config_loglevel=warn \
-    npm_config_include=dev
+    npm_config_include=dev \
+    NPM_CONFIG_INCLUDE=dev
 
 WORKDIR /workspace
 
 COPY . .
+
+RUN npm config delete include || true
 
 RUN cd shared \
     && npm ci \
