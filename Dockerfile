@@ -8,14 +8,15 @@ FROM node:20-bullseye AS node-builder
 
 ENV NPM_CONFIG_FUND=false \
     NPM_CONFIG_AUDIT=false \
-    npm_config_loglevel=warn
+    npm_config_loglevel=warn \
+    npm_config_include="" \
+    NPM_CONFIG_INCLUDE=""
 
 WORKDIR /workspace
 
 COPY . .
 
-RUN npm config delete include --global || true \
-    && npm config set include dev --global
+RUN npm config delete include --global || true
 
 RUN cd shared \
     && npm ci \
