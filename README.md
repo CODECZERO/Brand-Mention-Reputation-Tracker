@@ -36,17 +36,17 @@ rapidQuest/
 ```mermaid
 graph LR
     subgraph External
-        A[Reddit];
-        B[News API];
-        C[X (Twitter)];
-        D[RSS Feeds];
+        A[Reddit]
+        B[News API]
+        C[X (Twitter)]
+        D[RSS Feeds]
     end
 
     subgraph Backend_Services
-        AGG[Aggregator];
-        API[API Gateway];
-        ORCH[Orchestrator];
-        WORKER[Worker];
+        AGG[Aggregator]
+        API[API Gateway]
+        ORCH[Orchestrator]
+        WORKER[Worker]
     end
 
     subgraph Data_Stores
