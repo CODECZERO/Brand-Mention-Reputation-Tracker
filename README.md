@@ -31,52 +31,48 @@ rapidQuest/
 | **Frontend** (`frontend`) | React + Vite | Dashboard showing live mentions, analytics, spike alerts, topic clusters. |
 | **Shared** (`shared`) | TypeScript library | Common config, types, Redis helpers shared between Node services. |
 
-## Architecture Diagram
+## Architecture Overview (Text)
 
-```mermaid
-graph LR
-    subgraph External
-        A[Reddit]
-        B[News API]
-        C[X (Twitter)]
-        D[RSS Feeds]
-    end
-
-    subgraph Backend_Services
-        AGG[Aggregator]
-        API[API Gateway]
-        ORCH[Orchestrator]
-        WORKER[Worker]
-    end
-
-    subgraph Data_Stores
-        REDIS[[Redis]]
-        MONGO[[MongoDB]]
-    end
-
-    subgraph Frontend
-        UI[React Dashboard]
-    end
-
-    A --> AGG
-    B --> AGG
-    C --> AGG
-    D --> AGG
-
-    AGG --> REDIS
-    API --> REDIS
-    ORCH --> REDIS
-    WORKER --> REDIS
-    API --> MONGO
-
-    UI --> API
-    API --> UI
+```
+┌──────────────────────┐       ┌───────────────────────┐
+│    External Sources  │       │   Frontend Dashboard   │
+│  (Reddit, News, X,   │       │     (React + Vite)     │
+│      RSS Feeds)      │       └──────────▲────────────┘
+└───────────┬──────────┘                  │
+            │                             │ REST / Websocket
+            ▼                             │
+┌──────────────────────┐       ┌──────────┴────────────┐
+│      Aggregator      │       │     API Gateway        │
+│ (ingest & normalise) │       │   (public API layer)   │
+└──────────┬───────────┘       └──────────┬────────────┘
+           │                               │
+           ▼                               │
+   ┌──────────────┐                        │
+   │  Redis Queues│◄───────────────────────┘
+   └──────┬───────┘
+          │
+          ▼
+┌──────────────────────┐       ┌───────────────────────┐
+│     Orchestrator     │──────▶│     Worker (Rust)      │
+│ (task coordination)  │◀──────│ (processing pipeline)  │
+└──────────┬───────────┘       └──────────┬────────────┘
+           │                               │
+           ▼                               ▼
+      ┌──────────────┐             ┌────────────────────┐
+      │  Redis Store │             │    MongoDB Store    │
+      └──────┬───────┘             └─────────┬──────────┘
+             │                               │
+             └──────────────┬────────────────┘
+                            ▼
+                 ┌───────────────────────┐
+                 │ Frontend consumes API │
+                 └───────────────────────┘
 ```
 
 ## Technology Stack
 
 - **Backend:** Node.js 20, Express, Fastify, Redis, MongoDB, TypeScript
-- **Worker:** Python 3.11, FastAPI, Uvicorn, Redis, Pydantic, LangChain
+- **Worker:** Rust (Tokio, Axum, reqwest, Redis, serde)
 - **Frontend:** React 18, Vite, Tailwind CSS, shadcn/ui, React Query
 - **Infrastructure:** Redis queues/keys, MongoDB for persistent data, Docker + Nginx for deployment
 
