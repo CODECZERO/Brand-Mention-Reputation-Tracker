@@ -34,11 +34,9 @@ node dist/index.js &
 ORCHESTRATOR_PID=$!
 cd /app
 
-log "Starting worker"
-cd /app/worker
-python -m worker.app &
+log "Starting Rust worker"
+/usr/local/bin/worker-rs &
 WORKER_PID=$!
-cd /app
 
 log "Waiting for services to warm up"
 sleep 5

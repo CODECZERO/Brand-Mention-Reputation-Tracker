@@ -44,39 +44,43 @@ RUN cd frontend \
     && npm run build
 
 # ------------------------------
-# Python build stage for worker
+# Rust build stage for worker
 # ------------------------------
-FROM python:3.11-slim AS python-builder
-
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+FROM rust:1.79-slim AS rust-builder
 
 WORKDIR /workspace
 
-COPY worker/requirements.txt ./
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        build-essential \
+        pkg-config \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN python -m venv /opt/venv \
-    && /opt/venv/bin/pip install --upgrade pip \
-    && /opt/venv/bin/pip install --no-cache-dir -r requirements.txt
+COPY worker-rs ./worker-rs
+
+WORKDIR /workspace/worker-rs
+
+RUN cargo build --release
 
 # ------------------------------
 # Final runtime stage
 # ------------------------------
-FROM python:3.11-slim AS runtime
+FROM node:20-bullseye AS runtime
 
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PATH="/opt/venv/bin:${PATH}" \
-    PYTHONPATH="/app/worker/src:${PYTHONPATH}"
+ENV NODE_ENV=production \
+    LISTEN_PORT=10000 \
+    API_PORT=4000 \
+    AGGREGATOR_PORT=3001 \
+    ORCHESTRATOR_PORT=3003 \
+    WORKER_PORT=3004 \
+    PROMETHEUS_PORT=9103 \
+    WORKER_STATUS_PORT=3005
 
-# Install system deps, Node.js 20, and Nginx
+# Install system deps and Nginx
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         bash \
-        curl \
-        gnupg \
         ca-certificates \
-        build-essential \
         git \
         nginx \
         gettext-base \
@@ -84,13 +88,8 @@ RUN apt-get update \
         libopenblas0 \
         libomp5 \
         libgl1 \
-    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y --no-install-recommends nodejs \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
-
-# Copy Python virtualenv from builder
-COPY --from=python-builder /opt/venv /opt/venv
 
 WORKDIR /app
 
@@ -109,7 +108,7 @@ COPY --from=node-builder /workspace/orchestrator/dist ./orchestrator/dist
 COPY --from=node-builder /workspace/orchestrator/node_modules ./orchestrator/node_modules
 COPY --from=node-builder /workspace/orchestrator/package.json ./orchestrator/package.json
 
-COPY worker/src ./worker/src
+COPY --from=rust-builder /workspace/worker-rs/target/release/worker-rs /usr/local/bin/worker-rs
 
 # Static frontend assets served by Nginx
 COPY --from=node-builder /workspace/frontend/dist /usr/share/nginx/html
@@ -121,15 +120,6 @@ COPY deployment/scripts/start-render.sh /usr/local/bin/start-render.sh
 RUN chmod +x /usr/local/bin/start-render.sh \
     && chmod -R 755 /usr/share/nginx/html \
     && mkdir -p /run/nginx
-
-ENV NODE_ENV=production \
-    LISTEN_PORT=10000 \
-    API_PORT=4000 \
-    AGGREGATOR_PORT=3001 \
-    ORCHESTRATOR_PORT=3003 \
-    WORKER_PORT=3004 \
-    PROMETHEUS_PORT=9103 \
-    WORKER_STATUS_PORT=3005
 
 EXPOSE 10000
 
