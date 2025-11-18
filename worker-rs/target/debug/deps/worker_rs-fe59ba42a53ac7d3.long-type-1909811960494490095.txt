@@ -1,0 +1,1 @@
+std::iter::Map<std::slice::Iter<'_, std::string::String>, for<'a> fn(&'a str) -> Vec<f32> {hash_vector}>

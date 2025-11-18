@@ -5,7 +5,7 @@ use std::time::Instant;
 use anyhow::Result;
 use once_cell::sync::Lazy;
 use regex::Regex;
-use tracing::{info, warn};
+use tracing::warn;
 
 use crate::clustering::{Clusterer, ClusteringOutput};
 use crate::config::Settings;
@@ -90,7 +90,7 @@ impl Processor {
             .await;
         metrics.clustering_time_ms = clustering_output.duration_ms;
 
-        let mut clusters = self
+        let clusters = self
             .build_cluster_results(&brand, &chunk.chunk_id, &mentions, clustering_output)
             .await;
 

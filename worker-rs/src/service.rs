@@ -114,7 +114,7 @@ impl WorkerService {
             }
         };
 
-        let fallback_brand = brand_hint.clone();
+        let fallback_brand = brand_hint.to_string();
         let expected_brand = if chunk.brand.trim().is_empty() {
             fallback_brand.clone()
         } else {
@@ -168,7 +168,7 @@ impl WorkerService {
         brand: &str,
         reason: FailureReason,
         payload: &str,
-        error: &str,
+        _error: &str,
         chunk_id: &str,
     ) -> Result<()> {
         let failure = FailureRecord {
@@ -183,6 +183,7 @@ impl WorkerService {
             .record_failure(brand, &failure, reason.label())
             .await
             .context("record failure")
+            .map(|_| ())
     }
 
     async fn update_waiting(&self, queues: Option<&[String]>) {

@@ -25,7 +25,8 @@ pub async fn run(settings: Settings) -> Result<()> {
 
     let (shutdown_tx, _) = broadcast::channel::<()>(1);
 
-    let worker_loop = spawn_worker_loop(service.clone(), shutdown_tx.subscribe());
+    let mut worker_loop = spawn_worker_loop(service.clone(), shutdown_tx.subscribe());
+    tokio::pin!(worker_loop);
     let heartbeat_loop = spawn_heartbeat_loop(service.clone(), shutdown_tx.subscribe());
     let http_server = serve_http(settings.clone(), shutdown_tx.subscribe());
     let metrics_server = serve_metrics(settings.clone(), shutdown_tx.subscribe());
@@ -36,11 +37,13 @@ pub async fn run(settings: Settings) -> Result<()> {
         "Rust worker started"
     );
 
+    let mut worker_finished = false;
     tokio::select! {
         _ = signal::ctrl_c() => {
             info!("Shutdown signal received");
         }
-        res = worker_loop => {
+        res = &mut worker_loop => {
+            worker_finished = true;
             if let Err(err) = res {
                 error!(error = %err, "Worker task crashed");
             }
@@ -49,8 +52,10 @@ pub async fn run(settings: Settings) -> Result<()> {
 
     let _ = shutdown_tx.send(());
 
+    if !worker_finished {
+        worker_loop.await.ok();
+    }
     heartbeat_loop.await.ok();
-    worker_loop.await.ok();
     http_server.await.ok();
     metrics_server.await.ok();
 
@@ -80,18 +85,20 @@ fn spawn_heartbeat_loop(service: Arc<WorkerService>, mut shutdown: broadcast::Re
     })
 }
 
-fn serve_http(settings: Arc<Settings>, mut shutdown: broadcast::Receiver<()>) -> JoinHandle<()> {
+fn serve_http(settings: Arc<Settings>, shutdown: broadcast::Receiver<()>) -> JoinHandle<()> {
+    let http_port = settings.http_port;
+    let router_settings = settings.clone();
     let router = Router::new().route(
         "/health",
         get(move || {
-            let worker_id = settings.worker_id.clone();
+            let worker_id = router_settings.worker_id.clone();
             async move { Json(serde_json::json!({ "status": "ok", "workerId": worker_id })) }
         }),
     );
-    spawn_server(router, settings.http_port, shutdown)
+    spawn_server(router, http_port, shutdown)
 }
 
-fn serve_metrics(settings: Arc<Settings>, mut shutdown: broadcast::Receiver<()>) -> JoinHandle<()> {
+fn serve_metrics(settings: Arc<Settings>, shutdown: broadcast::Receiver<()>) -> JoinHandle<()> {
     let router = Router::new().route(
         "/metrics",
         get(move || async move {

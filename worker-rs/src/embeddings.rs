@@ -20,7 +20,7 @@ pub struct HashEmbeddingAdapter;
 #[async_trait]
 impl EmbeddingAdapter for HashEmbeddingAdapter {
     async fn embed(&self, texts: &[String], _brand: &str, _chunk_id: &str) -> Vec<Vec<f32>> {
-        texts.iter().map(hash_vector).collect()
+        texts.iter().map(|text| hash_vector(text)).collect()
     }
 }
 
@@ -43,7 +43,7 @@ pub struct RemoteEmbeddingAdapter {
 impl EmbeddingAdapter for RemoteEmbeddingAdapter {
     async fn embed(&self, texts: &[String], brand: &str, chunk_id: &str) -> Vec<Vec<f32>> {
         warn!(provider = %self.provider, count = texts.len(), brand, chunk_id, "Remote embedding provider not yet implemented; returning hashed vectors");
-        texts.iter().map(hash_vector).collect()
+        texts.iter().map(|text| hash_vector(text)).collect()
     }
 }
 

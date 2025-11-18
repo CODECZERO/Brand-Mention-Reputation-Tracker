@@ -34,59 +34,58 @@ rapidQuest/
 ## Architecture Overview (Text)
 
 ```
-       ┌──────┐     ┌───────┐     ┌────────┐
-       │  X   │     │ Reddit│     │ News API │
-       └──┬───┘     └──┬────┘     └───┬─────┘
-          │            │             │
-          └──────┬─────┴──────┬──────┘
-                 │            │ fetch data
-                 ▼            │
-             ┌───────────────┐
-             │   Aggregator  │
-             │ (fetch + chunk│
-             │   requests)   │
-             └──────┬────────┘
-                    │ enqueue chunk payloads
-                    ▼
-             ┌───────────────┐
-             │     Redis     │
-             │ (queues + KV) │
-             └─┬─────┬──────┘
-        chunk 1│     │ chunk 3
-               │     │
-               ▼     ▼
-          ┌────────────┐       ┌────────────┐
-          │  Worker 1  │       │  Worker 2  │
-          └─────┬──────┘       └─────┬──────┘
-                │ chunk 1 done        │ chunk 2 done
-                ▼                     ▼
-          ┌────────────┐       ┌────────────┐
-          │  Worker 3  │◀──────┴────────────┘
-          └─────┬──────┘
-                │ push chunk results
-                ▼
-             ┌───────────────┐
-             │     Redis     │
-             │ (worker data) │
-             └──────┬────────┘
-                    │ read aggregated data
-                    ▼
-             ┌───────────────┐
-             │  Orchestrator │
-             │  (combine)    │
-             └──────┬────────┘
-                    │ full dataset
-                    ▼
-             ┌───────────────┐
-             │  API Gateway  │
-             │ (public API)  │
-             └──────┬────────┘
-                    │ serve UI
-                    ▼
-             ┌───────────────┐
-             │   Frontend    │
-             │  Dashboard    │
-             └───────────────┘
+     ┌──────┐    ┌───────┐    ┌────────┐
+     │  X   │    │ Reddit│    │ News API│
+     └──┬───┘    └──┬────┘    └───┬────┘
+        │           │            │
+        └──────┬────┴────┬───────┘
+               │         │ fetch data
+               ▼         │
+           ┌───────────────┐
+           │  Aggregator    │
+           │ (fetch & chunk │
+           │    batches)    │
+           └──────┬─────────┘
+                  │ store chunk jobs
+                  ▼
+           ┌───────────────┐
+           │     Redis     │
+           │ (queue + KV)  │
+           └─┬────┬────┬───┘
+      chunk 1│    │    │chunk 3
+             │    │
+             ▼    ▼
+        ┌────────────┐    ┌────────────┐    ┌────────────┐
+        │  Worker A   │    │  Worker B   │    │  Worker C   │
+        │ (process)   │    │ (process)   │    │ (process)   │
+        └────┬────────┘    └────┬────────┘    └────┬────────┘
+             │ chunk results     │ chunk results     │ chunk results
+             └────┬──────────────┴──────────────┬────┘
+                  │ push back to Redis (results)
+                  ▼
+           ┌───────────────┐
+           │     Redis     │
+           │ (worker data) │
+           └──────┬────────┘
+                  │ read combined data
+                  ▼
+           ┌───────────────┐
+           │ Orchestrator  │
+           │  (merge + gen │
+           │   full data)  │
+           └──────┬────────┘
+                  │ final payloads
+                  ▼
+           ┌───────────────┐
+           │  API Gateway  │
+           │  (public API) │
+           └──────┬────────┘
+                  │ serve UI
+                  ▼
+           ┌───────────────┐
+           │   Frontend    │
+           │  Dashboard    │
+           └───────────────┘
 ```
 
 ## Technology Stack

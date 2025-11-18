@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use anyhow::Context;
-use redis::{aio::ConnectionManager, AsyncCommands, Client, RedisResult};
+use redis::{aio::ConnectionManager, Client};
 use tokio::sync::Mutex;
 use tokio::time::sleep;
 
@@ -13,8 +13,7 @@ pub struct RedisClient {
 impl RedisClient {
     pub async fn new(url: &str) -> anyhow::Result<Self> {
         let client = Client::open(url.to_string()).context("Failed to create Redis client")?;
-        let manager = client
-            .get_tokio_connection_manager()
+        let manager = ConnectionManager::new(client)
             .await
             .context("Failed to create Redis connection manager")?;
         Ok(Self {
