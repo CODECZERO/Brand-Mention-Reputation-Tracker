@@ -13,7 +13,6 @@ type LoadEnvOptions = NonNullable<Parameters<typeof loadEnv>[0]>;
 
 const loadOptions: LoadEnvOptions = {
   allowEmptyValues: true,
-  systemvars: true,
 };
 
 if (fs.existsSync(envPath)) {
