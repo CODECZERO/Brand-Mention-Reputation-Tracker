@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { config as loadEnv } from "dotenv-safe";
@@ -5,11 +6,25 @@ import { config as loadEnv } from "dotenv-safe";
 const currentFilePath = fileURLToPath(import.meta.url);
 const currentDir = path.dirname(currentFilePath);
 
-loadEnv({
-  path: path.resolve(currentDir, "../../.env"),
-  example: path.resolve(currentDir, "../../.env.example"),
+const envPath = path.resolve(currentDir, "../../.env");
+const examplePath = path.resolve(currentDir, "../../.env.example");
+
+type LoadEnvOptions = NonNullable<Parameters<typeof loadEnv>[0]>;
+
+const loadOptions: LoadEnvOptions = {
   allowEmptyValues: true,
-});
+  systemvars: true,
+};
+
+if (fs.existsSync(envPath)) {
+  loadOptions.path = envPath;
+}
+
+if (fs.existsSync(examplePath)) {
+  loadOptions.example = examplePath;
+}
+
+loadEnv(loadOptions);
 
 interface NumberOptions {
   readonly min?: number;

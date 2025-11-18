@@ -46,7 +46,7 @@ RUN cd frontend \
 # ------------------------------
 # Rust build stage for worker
 # ------------------------------
-FROM rust:1.83-slim AS rust-builder
+FROM rust:1.83-bullseye AS rust-builder
 
 WORKDIR /workspace
 
