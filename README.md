@@ -27,7 +27,7 @@ rapidQuest/
 | **API Gateway** (`api-gateway`) | Node.js (Express) | Public API consumed by the frontend. Handles brand CRUD, live mentions, spikes, summaries. Connects to MongoDB & Redis. |
 | **Aggregator** (`aggregator`) | Node.js (Express) | Polls external sources (Reddit, News, X, RSS) for brand mentions, normalises them, and writes to Redis. |
 | **Orchestrator** (`orchestrator`) | Node.js (Fastify) | Coordinates chunked processing, monitors workers, aggregates results, exposes health/metrics endpoints. |
-| **Worker** (`worker`) | Python (FastAPI + Uvicorn) | Consumes chunk jobs from Redis, runs embedding & LLM pipelines, stores enriched results back to Redis. |
+| **Worker** (`worker-rs`) | Rust (Tokio + Axum) | Consumes chunk jobs from Redis, runs embedding & LLM pipelines, stores enriched results back to Redis. |
 | **Frontend** (`frontend`) | React + Vite | Dashboard showing live mentions, analytics, spike alerts, topic clusters. |
 | **Shared** (`shared`) | TypeScript library | Common config, types, Redis helpers shared between Node services. |
 
@@ -36,17 +36,17 @@ rapidQuest/
 ```mermaid
 graph LR
     subgraph External
-        A[Reddit]
-        B[News API]
-        C[X (Twitter)]
-        D[RSS Feeds]
+        A[Reddit];
+        B[News API];
+        C[X (Twitter)];
+        D[RSS Feeds];
     end
 
     subgraph Backend_Services
-        AGG[Aggregator]
-        API[API Gateway]
-        ORCH[Orchestrator]
-        WORKER[Worker]
+        AGG[Aggregator];
+        API[API Gateway];
+        ORCH[Orchestrator];
+        WORKER[Worker];
     end
 
     subgraph Data_Stores
