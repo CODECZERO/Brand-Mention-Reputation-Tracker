@@ -237,6 +237,5 @@ Shared constants (see `shared/src/constants/redisKeys.ts`):
 4. Submit PR with description of service impact
 
 ## License
-
-This project is proprietary to the RapidQuest team. All rights reserved.
+licensed under the [MIT License](LICENSE).
 # Brand-Mention-Reputation-Tracker
